@@ -8,49 +8,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # =====================
-      # Checkout
-      # =====================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # =====================
-      # Python
-      # =====================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # =====================
-      # System deps
-      # =====================
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
-          autoconf libtool pkg-config zlib1g-dev libncurses5-dev \
-          libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
+          sudo apt install -y git zip unzip openjdk-17-jdk \
+          autoconf libtool pkg-config zlib1g-dev \
+          libncurses5-dev libncursesw5-dev libtinfo6 \
+          cmake libffi-dev libssl-dev
 
-      # =====================
-      # Python deps
-      # =====================
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install cython buildozer
 
-      # =====================
-      # Build APK (ВАЖНО)
-      # =====================
+      # 🔥 ВАЖНО: фикс лицензий Android SDK
+      - name: Fix Android licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+
       - name: Build APK
         run: |
           cd mobile_app
-          buildozer android debug
+          buildozer -v android debug
 
-      # =====================
-      # Upload APK
-      # =====================
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
