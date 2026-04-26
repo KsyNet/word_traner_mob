@@ -8,72 +8,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ========================
-      # 1. Checkout repo
-      # ========================
+      # =====================
+      # Checkout
+      # =====================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ========================
-      # 2. Python
-      # ========================
+      # =====================
+      # Python
+      # =====================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ========================
-      # 3. System dependencies
-      # ========================
+      # =====================
+      # System deps
+      # =====================
       - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
           autoconf libtool pkg-config zlib1g-dev libncurses5-dev \
-          libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev wget
+          libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
 
-      # ========================
-      # 4. Install Buildozer
-      # ========================
-      - name: Install Python tools
+      # =====================
+      # Python deps
+      # =====================
+      - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install cython buildozer
 
-      # ========================
-      # 5. Install Android SDK (FIX aidl)
-      # ========================
-      - name: Install Android SDK
-        run: |
-          mkdir -p $HOME/android-sdk
-          cd $HOME/android-sdk
-
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip commandlinetools-linux-11076708_latest.zip
-
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/* cmdline-tools/latest/ || true
-
-          yes | cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-          cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.2" \
-            "ndk;25.1.8937393"
-
-      # ========================
-      # 6. Build APK
-      # ========================
-      - name: Build APK with Buildozer
+      # =====================
+      # Build APK (ВАЖНО)
+      # =====================
+      - name: Build APK
         run: |
           cd mobile_app
-          buildozer -v android debug
+          buildozer android debug
 
-      # ========================
-      # 7. Upload APK
-      # ========================
-      - name: Upload APK artifact
+      # =====================
+      # Upload APK
+      # =====================
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
