@@ -1,0 +1,46 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Системные зависимости (ВАЖНО для buildozer)
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
+          autoconf libtool pkg-config zlib1g-dev libncurses5-dev \
+          libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
+
+      # 4. Python зависимости
+      - name: Install Python packages
+        run: |
+          pip install --upgrade pip
+          pip install cython buildozer
+
+      # 5. Build APK
+      - name: Build APK
+        run: |
+          cd mobile_app
+          buildozer -v android debug
+
+      # 6. Сохраняем APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: mobile_app/bin/*.apk
