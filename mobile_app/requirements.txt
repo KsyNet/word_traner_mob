@@ -1,0 +1,4 @@
+kivy
+requests
+kivymd
+buildozer
