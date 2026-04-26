@@ -5,41 +5,64 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
+      # =====================
+      # Checkout
+      # =====================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # =====================
+      # Python
+      # =====================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
+      # =====================
+      # System deps
+      # =====================
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk \
-          autoconf libtool pkg-config zlib1g-dev \
-          libncurses5-dev libncursesw5-dev libtinfo6 \
-          cmake libffi-dev libssl-dev
+          sudo apt install -y \
+            git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libtinfo6 cmake libffi-dev libssl-dev
 
+      # =====================
+      # Install Buildozer
+      # =====================
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install cython buildozer
 
-      # 🔥 ВАЖНО: фикс лицензий Android SDK
-      - name: Fix Android licenses
+      # =====================
+      # Accept Android licenses (ВАЖНО)
+      # =====================
+      - name: Accept Android SDK licenses
         run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
+          mkdir -p $HOME/.android
+          touch $HOME/.android/repositories.cfg
 
+      # =====================
+      # Build APK
+      # =====================
       - name: Build APK
         run: |
           cd mobile_app
-          buildozer -v android debug
 
+          yes | buildozer android clean
+          yes | buildozer android debug
+
+      # =====================
+      # Upload APK
+      # =====================
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
